@@ -3,26 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Ashwood Manor — Test Build</title>
+  <title>Ashwood Manor — V5 Expanded</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <section id="loading" class="screen" aria-live="polite">
     <div class="spinner"></div>
     <h1>ASHWOOD MANOR</h1>
-    <p>Preparing test build…</p>
+    <p>Loading expanded build…</p>
   </section>
   <section id="menu" class="screen" hidden>
     <h1>ASHWOOD MANOR</h1>
-    <p class="subtitle">V5 PLAYABLE TEST BUILD</p>
+    <p class="subtitle">V5 EXPANDED BUILD</p>
     <button id="start-button" type="button">START GAME</button>
-    <p class="help">WASD: Move · Shift: Run · Mouse: Camera · Esc: Release mouse</p>
+    <p class="help">WASD: Move · Shift: Run · Mouse: Camera · E: Interact · Esc: Release mouse</p>
   </section>
   <main id="game" hidden>
     <canvas id="game-canvas"></canvas>
     <div id="hud">
-      <div id="status">Test scene loaded</div>
-      <div id="controls">WASD move · Shift run · click to capture mouse</div>
+      <div id="status">Explore the mansion. Find the red key.</div>
+      <div id="controls">WASD move · Shift run · E interact · click to capture mouse</div>
+      <div id="inventory">Keys: 0</div>
     </div>
   </main>
   <section id="error-panel" class="screen error" hidden>
