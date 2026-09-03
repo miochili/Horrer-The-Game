@@ -1,2 +1,37 @@
-class Hero{constructor(scene){this.group=new THREE.Group();this.group.position.set(0,0,18);this.health=100;this.speed=4;this.run=7;const body=new THREE.Mesh(new THREE.CapsuleGeometry?new THREE.CapsuleGeometry(.45,1.25,4,8):new THREE.CylinderGeometry(.45,.55,1.8,8),new THREE.MeshStandardMaterial({color:0x28384a}));body.position.y=1;this.group.add(body);const head=new THREE.Mesh(new THREE.SphereGeometry(.42,12,8),new THREE.MeshStandardMaterial({color:0xd6b08f}));head.position.y=2.12;this.group.add(head);scene.add(this.group)}}
-class Shadow{constructor(scene,x,z){this.group=new THREE.Group();this.group.position.set(x,0,z);this.active=true;const body=new THREE.Mesh(new THREE.CylinderGeometry(.55,.8,2.2,8),new THREE.MeshStandardMaterial({color:0x130814,emissive:0x18001c}));body.position.y=1.1;this.group.add(body);const eye=new THREE.PointLight(0xff2d2d,2,8);eye.position.y=1.5;this.group.add(eye);scene.add(this.group)}update(hero,dt){if(!this.active)return;const d=hero.group.position.distanceTo(this.group.position);if(d<12&&d>2){const v=hero.group.position.clone().sub(this.group.position);v.y=0;v.normalize();this.group.position.addScaledVector(v,dt*1.5)}if(d<1.7)hero.health=Math.max(0,hero.health-20*dt)}}
+class PlayerCharacter {
+  constructor(scene) {
+    this.root = new THREE.Group();
+    this.root.position.set(0, 0, 8);
+    this.walkSpeed = 4.2;
+    this.runSpeed = 7.0;
+
+    const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x29445c, roughness: 0.85 });
+    const skinMaterial = new THREE.MeshStandardMaterial({ color: 0xd8ad8c, roughness: 0.9 });
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.58, 1.7, 12), bodyMaterial);
+    body.position.y = 1.0;
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.42, 16, 12), skinMaterial);
+    head.position.y = 2.12;
+    const shoulderLight = new THREE.PointLight(0xffe4b0, 0.8, 7);
+    shoulderLight.position.set(0, 1.7, 0.15);
+    this.root.add(body, head, shoulderLight);
+    scene.add(this.root);
+  }
+
+  update(delta, keys, yaw) {
+    const forward = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw) * -1);
+    const right = new THREE.Vector3(forward.z * -1, 0, forward.x);
+    const movement = new THREE.Vector3();
+    if (keys.KeyW) movement.add(forward);
+    if (keys.KeyS) movement.sub(forward);
+    if (keys.KeyA) movement.sub(right);
+    if (keys.KeyD) movement.add(right);
+    if (movement.lengthSq() > 0) {
+      movement.normalize();
+      const speed = keys.ShiftLeft || keys.ShiftRight ? this.runSpeed : this.walkSpeed;
+      this.root.position.addScaledVector(movement, speed * delta);
+      this.root.rotation.y = Math.atan2(movement.x, movement.z);
+    }
+    this.root.position.x = THREE.MathUtils.clamp(this.root.position.x, -16, 16);
+    this.root.position.z = THREE.MathUtils.clamp(this.root.position.z, -16, 16);
+  }
+}
