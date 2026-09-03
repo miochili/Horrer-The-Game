@@ -1,12 +1,4 @@
-// Horror-The-Game: Part 1 - Firebase Configuration
-// IMPORTANT: Replace these placeholder values with your own Firebase project credentials!
-
-// Step 1: Go to https://console.firebase.google.com/
-// Step 2: Create a new project (free)
-// Step 3: Enable Authentication > Sign-in method > Google
-// Step 4: Enable Firestore Database
-// Step 5: Copy your config values below
-
+// Horror-The-Game: Part 1 v2.1 - Enhanced Configuration
 const firebaseConfig = {
     apiKey: "YOUR_API_KEY_HERE",
     authDomain: "your-project.firebaseapp.com",
@@ -16,57 +8,44 @@ const firebaseConfig = {
     appId: "1:123456789012:web:abcdef123456"
 };
 
-// Initialize Firebase
 let app, auth, db;
-
 try {
     app = firebase.initializeApp(firebaseConfig);
     auth = firebase.auth();
     db = firebase.firestore();
-    console.log('Firebase initialized successfully');
 } catch (error) {
-    console.warn('Firebase not configured yet. Game will use local storage only.');
-    console.warn('Follow the instructions in js/config.js to set up Firebase.');
+    console.warn('Firebase not configured');
 }
 
-// Game Configuration
 const GAME_CONFIG = {
-    // Player settings
-    playerSpeed: 5,
-    playerSprintMultiplier: 1.8,
-    playerStaminaDrain: 25,
-    playerStaminaRegen: 10,
+    playerSpeed: 6,
+    playerSprintMultiplier: 2.0,
+    playerStaminaDrain: 30,
+    playerStaminaRegen: 15,
     playerMaxHealth: 100,
-    
-    // Enemy settings
-    enemySpeed: 3.5,
+    playerMaxSanity: 100,
+    sanityDrainRate: 2,
+    sanityDrainNearEnemy: 8,
+    enemySpeed: 4.0,
     enemyDamage: 25,
-    enemyDetectionRange: 15,
-    enemyAttackCooldown: 2000,
-    
-    // Game settings
+    enemyDetectionRange: 18,
+    enemyAttackCooldown: 1800,
     checkpointRespawnHealth: 50,
+    checkpointRespawnSanity: 60,
     maxSaveSlots: 3,
-    autoSaveInterval: 60000, // 1 minute
-    
-    // Jump scare settings
-    jumpScareMinInterval: 30000, // 30 seconds
-    jumpScareMaxInterval: 120000, // 2 minutes
-    
-    // Audio settings
+    autoSaveInterval: 45000,
+    jumpScareMinInterval: 20000,
+    jumpScareMaxInterval: 90000,
     masterVolume: 0.8,
     musicVolume: 0.6,
-    sfxVolume: 0.8,
-    
-    // Graphics settings
-    graphicsQuality: 'medium',
+    sfxVolume: 0.85,
+    graphicsQuality: 'high',
     shadowEnabled: true,
     fogEnabled: true,
-    fogDensity: 0.03,
-    fogColor: 0x0a0a0a
+    fogDensity: 0.04,
+    fogColor: 0x050505,
+    mapScale: 2.0,
+    numEnemies: 5,
+    numPuzzles: 7,
+    numCheckpoints: 6
 };
-
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { firebaseConfig, app, auth, db, GAME_CONFIG };
-}
