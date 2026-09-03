@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horror-The-Game: Part 1 - Das Verlassene Labor</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Main Menu -->
+    <div id="main-menu" class="menu-screen">
+        <h1 class="game-title">HORROR-THE-GAME</h1>
+        <h2 class="subtitle">Part 1: Das Verlassene Labor</h2>
+        <div class="menu-buttons">
+            <button id="btn-new-game" class="menu-btn">New Game</button>
+            <button id="btn-continue" class="menu-btn" disabled>Continue</button>
+            <button id="btn-load-game" class="menu-btn">Load Game</button>
+            <button id="btn-settings" class="menu-btn">Settings</button>
+            <button id="btn-credits" class="menu-btn">Credits</button>
+        </div>
+        <div id="auth-section">
+            <button id="btn-signin" class="auth-btn">Sign in with Google</button>
+            <div id="user-info" class="user-info" style="display:none;">
+                <img id="user-avatar" src="" alt="Avatar">
+                <span id="user-name"></span>
+                <button id="btn-signout" class="auth-btn small">Sign Out</button>
+            </div>
+        </div>
+        <p class="save-status" id="save-status"></p>
+    </div>
+
+    <!-- Game Canvas -->
+    <div id="game-container" style="display:none;">
+        <canvas id="game-canvas"></canvas>
+        
+        <!-- HUD -->
+        <div id="hud" class="hud">
+            <div class="hud-left">
+                <div class="health-bar">
+                    <div id="health-fill" class="health-fill"></div>
+                    <span id="health-text">100%</span>
+                </div>
+                <div class="stamina-bar">
+                    <div id="stamina-fill" class="stamina-fill"></div>
+                    <span id="stamina-text">100%</span>
+                </div>
+            </div>
+            <div class="hud-center">
+                <div id="objective-text" class="objective">Find the exit</div>
+            </div>
+            <div class="hud-right">
+                <div id="inventory" class="inventory"></div>
+                <button id="btn-pause" class="pause-btn">⏸</button>
+            </div>
+        </div>
+
+        <!-- Dialogue Box -->
+        <div id="dialogue-box" class="dialogue-box" style="display:none;">
+            <div id="dialogue-text"></div>
+            <button id="btn-dialogue-next" class="dialogue-btn">Next</button>
+        </div>
+
+        <!-- Interaction Prompt -->
+        <div id="interaction-prompt" class="interaction-prompt" style="display:none;">
+            Press <span class="key">E</span> to <span id="interaction-text"></span>
+        </div>
+    </div>
+
+    <!-- Pause Menu -->
+    <div id="pause-menu" class="menu-screen" style="display:none;">
+        <h2>PAUSED</h2>
+        <div class="menu-buttons">
+            <button id="btn-resume" class="menu-btn">Resume</button>
+            <button id="btn-save-game" class="menu-btn">Save Game</button>
+            <button id="btn-load-game-pause" class="menu-btn">Load Game</button>
+            <button id="btn-settings-pause" class="menu-btn">Settings</button>
+            <button id="btn-main-menu" class="menu-btn">Main Menu</button>
+        </div>
+    </div>
+
+    <!-- Jump Scare Overlay -->
+    <div id="jump-scare-overlay" class="jump-scare-overlay" style="display:none;">
+        <img id="jump-scare-image" src="" alt="Jump Scare">
+    </div>
+
+    <!-- Death Screen -->
+    <div id="death-screen" class="menu-screen" style="display:none;">
+        <h2 class="death-title">YOU DIED</h2>
+        <p id="death-reason"></p>
+        <div class="menu-buttons">
+            <button id="btn-respawn" class="menu-btn">Respawn at Checkpoint</button>
+            <button id="btn-death-menu" class="menu-btn">Main Menu</button>
+        </div>
+    </div>
+
+    <!-- Victory Screen -->
+    <div id="victory-screen" class="menu-screen" style="display:none;">
+        <h2 class="victory-title">PART 1 COMPLETE</h2>
+        <p id="victory-text">You escaped the laboratory... but the creature follows.</p>
+        <div class="menu-buttons">
+            <button id="btn-part2-teaser" class="menu-btn">Part 2 Coming Soon</button>
+            <button id="btn-victory-menu" class="menu-btn">Main Menu</button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h3>Settings</h3>
+            <div class="setting-row">
+                <label>Master Volume</label>
+                <input type="range" id="volume-master" min="0" max="100" value="80">
+            </div>
+            <div class="setting-row">
+                <label>Music Volume</label>
+                <input type="range" id="volume-music" min="0" max="100" value="60">
+            </div>
+            <div class="setting-row">
+                <label>SFX Volume</label>
+                <input type="range" id="volume-sfx" min="0" max="100" value="80">
+            </div>
+            <div class="setting-row">
+                <label>Graphics Quality</label>
+                <select id="graphics-quality">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+            <button id="btn-settings-close" class="menu-btn">Close</button>
+        </div>
+    </div>
+
+    <!-- Credits Modal -->
+    <div id="credits-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h3>Credits</h3>
+            <p><strong>Game Design & Development:</strong> Nicola Peter</p>
+            <p><strong>Story:</strong> AI Assistant</p>
+            <p><strong>Engine:</strong> Three.js</p>
+            <p><strong>Authentication:</strong> Firebase</p>
+            <p class="credits-note">Created for Horror-The-Game Part 1</p>
+            <button id="btn-credits-close" class="menu-btn">Close</button>
+        </div>
+    </div>
+
+    <!-- Load Game Modal -->
+    <div id="load-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h3>Load Game</h3>
+            <div id="save-slots" class="save-slots"></div>
+            <button id="btn-load-close" class="menu-btn">Close</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/firebase-auth.js"></script>
+    <script src="js/save-system.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/entities.js"></script>
+    <script src="js/puzzles.js"></script>
+    <script src="js/story.js"></script>
+    <script src="js/jump-scares.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
