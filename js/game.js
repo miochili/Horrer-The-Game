@@ -1,1 +1,128 @@
-let scene,camera,renderer,hero,shadow,keys={},playing=false,paused=false,clock=new THREE.Clock();const el=id=>document.getElementById(id);function box(x,y,z,w,h,d,c){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color:c,roughness:.8}));m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;scene.add(m);return m}function lamp(x,y,z,color=0xffcf8a){const l=new THREE.PointLight(color,2.4,18);l.position.set(x,y,z);l.castShadow=true;scene.add(l)}function init(){scene=new THREE.Scene();scene.background=new THREE.Color(0x101522);scene.fog=new THREE.FogExp2(0x101522,.012);camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,200);renderer=new THREE.WebGLRenderer({canvas:el('canvas'),antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;scene.add(new THREE.HemisphereLight(0x93aaff,0x25140d,.65));const floor=box(0,-.1,0,70,.2,80,0x35281f);box(-35,3,0,1,6,80,0x211812);box(35,3,0,1,6,80,0x211812);box(0,3,-39,70,6,1,0x211812);box(0,3,39,70,6,1,0x211812);box(-16,3,5,1,6,50,0x281e18);box(16,3,5,1,6,50,0x281e18);box(0,3,-10,32,6,1,0x281e18);for(let i=0;i<6;i++){box(-27,2,-25+i*8,3,4,2,0x3d2b20);box(27,2,-25+i*8,3,4,2,0x3d2b20)}box(0,1,5,10,2,5,0x593d2b);box(0,1,-23,12,2,4,0x503526);lamp(0,5,22,0x9bb8ff);lamp(0,5,8);lamp(-25,5,-12);lamp(25,5,-12);lamp(0,5,-28,0xff9055);hero=new Hero(scene);shadow=new Shadow(scene,25,-18);el('objective').textContent='Ziel: Finde Noras Funkspruch in der Bibliothek.';show(STORY.intro,6000);animate()}function show(t,ms=3500){const m=el('message');m.textContent=t;m.style.display='block';setTimeout(()=>m.style.display='none',ms)}function start(){el('menu').hidden=true;el('game').hidden=false;playing=true;el('canvas').requestPointerLock()}function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.05);if(playing&&!paused){const v=new THREE.Vector3();const f=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);f.y=0;f.normalize();const r=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);r.y=0;r.normalize();if(keys.w)v.add(f);if(keys.s)v.sub(f);if(keys.a)v.sub(r);if(keys.d)v.add(r);if(v.lengthSq()){v.normalize();hero.group.position.addScaledVector(v,(keys.shift?hero.run:hero.speed)*dt)}hero.group.position.x=Math.max(-33,Math.min(33,hero.group.position.x));hero.group.position.z=Math.max(-37,Math.min(37,hero.group.position.z));shadow.update(hero,dt);if(hero.group.position.distanceTo(new THREE.Vector3(-27,0,-20))<3&& !window.letter){window.letter=true;show(STORY.letter,7000);el('objective').textContent='Ziel: Erreiche die verschlossene Kellertür am Ende der Halle.'}if(window.letter&&hero.group.position.z<-34){playing=false;el('ending').hidden=false;document.exitPointerLock()}if(hero.health<=0){playing=false;show('Du wurdest gefunden. Seite neu laden, um erneut zu beginnen.',10000)}el('health').innerHTML='GESUNDHEIT <span>'+Math.ceil(hero.health)+'</span>'}const offset=new THREE.Vector3(0,4,7).applyAxisAngle(new THREE.Vector3(0,1,0),camera.rotation.y);camera.position.lerp(hero.group.position.clone().add(offset),.12);camera.lookAt(hero.group.position.clone().add(new THREE.Vector3(0,1.4,0)));renderer.render(scene,camera)}addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key==='Escape'&&playing){paused=!paused;el('pause').hidden=!paused;if(paused)document.exitPointerLock()}});addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);addEventListener('mousemove',e=>{if(document.pointerLockElement===el('canvas')&&playing&&!paused){camera.rotation.y-=e.movementX*.002}});addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});el('play').onclick=start;el('resume').onclick=()=>{paused=false;el('pause').hidden=true;el('canvas').requestPointerLock()};el('back').onclick=()=>location.reload();el('end-menu').onclick=()=>location.reload();window.addEventListener('load',()=>{init();el('loading').hidden=true;el('menu').hidden=false});
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const keys = Object.create(null);
+  let scene, camera, renderer, player;
+  let yaw = 0;
+  let pitch = -0.22;
+  let started = false;
+  let lastTime = performance.now();
+
+  function showError(error) {
+    console.error(error);
+    $('loading').hidden = true;
+    $('menu').hidden = true;
+    $('game').hidden = true;
+    $('error-text').textContent = error && error.stack ? error.stack : String(error);
+    $('error-panel').hidden = false;
+  }
+
+  window.addEventListener('error', (event) => showError(event.error || event.message));
+  window.addEventListener('unhandledrejection', (event) => showError(event.reason));
+
+  function addBox(x, y, z, width, height, depth, color) {
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(width, height, depth),
+      new THREE.MeshStandardMaterial({ color, roughness: 0.82 })
+    );
+    mesh.position.set(x, y, z);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+    return mesh;
+  }
+
+  function addLight(x, y, z, color, intensity, distance) {
+    const light = new THREE.PointLight(color, intensity, distance, 2);
+    light.position.set(x, y, z);
+    light.castShadow = true;
+    scene.add(light);
+    return light;
+  }
+
+  function buildTestMansion() {
+    scene.add(new THREE.HemisphereLight(0x91add8, 0x20100b, 0.75));
+    const moon = new THREE.DirectionalLight(0x9dbdff, 1.1);
+    moon.position.set(-10, 15, 8);
+    moon.castShadow = true;
+    scene.add(moon);
+
+    addBox(0, -0.2, 0, 36, 0.4, 36, 0x3c3028);
+    addBox(0, 3, -17, 36, 6, 0.5, 0x2a211d);
+    addBox(0, 3, 17, 36, 6, 0.5, 0x2a211d);
+    addBox(-17, 3, 0, 0.5, 6, 36, 0x2a211d);
+    addBox(17, 3, 0, 0.5, 6, 36, 0x2a211d);
+    addBox(0, 3, 0, 0.5, 6, 18, 0x30251e);
+    addBox(-8, 1.1, -4, 5, 2.2, 2, 0x4c3322);
+    addBox(8, 1.1, 4, 5, 2.2, 2, 0x4c3322);
+    addBox(-11, 2.2, 8, 2, 4.4, 6, 0x342419);
+    addBox(11, 2.2, 8, 2, 4.4, 6, 0x342419);
+    addLight(-8, 4.8, -8, 0xffc377, 2.7, 17);
+    addLight(8, 4.8, -8, 0xffc377, 2.7, 17);
+    addLight(0, 5.0, 10, 0x9ebcff, 2.0, 18);
+  }
+
+  function init() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111a2b);
+    scene.fog = new THREE.FogExp2(0x111a2b, 0.025);
+    camera = Three.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 150);
+    renderer = new THREE.WebGLRenderer({ canvas: $('game-canvas'), antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    buildTestMansion();
+    player = new PlayerCharacter(scene);
+    animate();
+    setTimeout(() => { $('loading').hidden = true; $('menu').hidden = false; }, 350);
+  }
+
+  function startGame() {
+    $('menu').hidden = true;
+    $('game').hidden = false;
+    started = true;
+    $('status').textContent = 'Playable test scene — movement active';
+    $('game-canvas').requestPointerLock?.();
+  }
+
+  function updateCamera() {
+    const offset = new THREE.Vector3(0, 4.1, 7.2);
+    offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+    const target = player.root.position.clone().add(new THREE.Vector3(0, 1.3, 0));
+    const desired = target.clone().add(offset);
+    camera.position.lerp(desired, 0.12);
+    const lookTarget = target.clone().add(new THREE.Vector3(Math.sin(yaw) * 4, pitch * 3, -Math.cos(yaw) * 4));
+    camera.lookAt(lookTarget);
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    const now = performance.now();
+    const delta = Math.min((now - lastTime) / 1000, 0.05);
+    lastTime = now;
+    if (started) {
+      player.update(delta, keys, yaw);
+      updateCamera();
+    }
+    renderer.render(scene, camera);
+  }
+
+  $('start-button').addEventListener('click', startGame);
+  $('reload-button').addEventListener('click', () => window.location.reload());
+  window.addEventListener('keydown', (event) => { keys[event.code] = true; });
+  window.addEventListener('keyup', (event) => { keys[event.code] = false; });
+  window.addEventListener('mousemove', (event) => {
+    if (started && document.pointerLockElement === $('game-canvas')) {
+      yaw -= event.movementX * 0.0025;
+      pitch = THREE.MathUtils.clamp(pitch - event.movementY * 0.002, -0.75, 0.25);
+    }
+  });
+  window.addEventListener('resize', () => {
+    if (!camera || !renderer) return;
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+  window.addEventListener('load', () => { try { init(); } catch (error) { showError(error); } });
+})();

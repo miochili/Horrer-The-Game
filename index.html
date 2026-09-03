@@ -1,1 +1,37 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ashwood Manor — Part 1</title><link rel="stylesheet" href="css/style.css"></head><body><section id="loading" class="screen"><div class="spinner"></div><h1>ASHWOOD MANOR</h1><p>Lade das Anwesen …</p></section><section id="menu" class="screen" hidden><h1>ASHWOOD MANOR</h1><p class="sub">PART I — THE LETTER</p><button id="play">SPIEL STARTEN</button><p class="hint">WASD: Laufen · Shift: Rennen · E: Interagieren · ESC: Pause</p></section><main id="game" hidden><canvas id="canvas"></canvas><div id="hud"><div id="objective">Ziel: Betritt das Anwesen.</div><div id="health">GESUNDHEIT <span>100</span></div><div id="message"></div></div><section id="pause" class="panel" hidden><h2>PAUSE</h2><button id="resume">WEITER</button><button id="back">HAUPTMENÜ</button></section><section id="ending" class="panel" hidden><h2>FORTSETZUNG FOLGT</h2><p>Du hast Noras Nachricht gefunden. Doch die Tür zum Keller hat sich geöffnet.</p><button id="end-menu">HAUPTMENÜ</button></section></main><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script><script src="js/entities.js"></script><script src="js/story.js"></script><script src="js/game.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ashwood Manor — Test Build</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <section id="loading" class="screen" aria-live="polite">
+    <div class="spinner"></div>
+    <h1>ASHWOOD MANOR</h1>
+    <p>Preparing test build…</p>
+  </section>
+  <section id="menu" class="screen" hidden>
+    <h1>ASHWOOD MANOR</h1>
+    <p class="subtitle">V5 PLAYABLE TEST BUILD</p>
+    <button id="start-button" type="button">START GAME</button>
+    <p class="help">WASD: Move · Shift: Run · Mouse: Camera · Esc: Release mouse</p>
+  </section>
+  <main id="game" hidden>
+    <canvas id="game-canvas"></canvas>
+    <div id="hud">
+      <div id="status">Test scene loaded</div>
+      <div id="controls">WASD move · Shift run · click to capture mouse</div>
+    </div>
+  </main>
+  <section id="error-panel" class="screen error" hidden>
+    <h1>GAME ERROR</h1>
+    <pre id="error-text"></pre>
+    <button id="reload-button" type="button">RELOAD</button>
+  </section>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="js/entities.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
