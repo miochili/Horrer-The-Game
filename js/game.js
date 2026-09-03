@@ -1,4 +1,4 @@
-// Horror-The-Game: Part 1 v2.2 - Enhanced Game Engine
+// Horror-The-Game: Part 1 v2.3 - Fixed Loading Screen
 class Game {
     constructor() {
         this.scene = null; this.camera = null; this.renderer = null;
@@ -29,6 +29,11 @@ class Game {
         this.setupLighting();
         this.loadLevel1();
         this.animate();
+        // Hide loading screen immediately, show main menu
+        setTimeout(() => {
+            document.getElementById('loading-screen').hidden = true;
+            document.getElementById('main-menu').hidden = false;
+        }, 500);
     }
     
     setupLighting() {
@@ -250,21 +255,14 @@ class Game {
     }
     
     startNewGame() {
-        document.getElementById('loading-screen').hidden = false;
-        document.getElementById('loading-progress').style.width = '20%';
-        setTimeout(() => { document.getElementById('loading-progress').style.width = '50%'; }, 300);
-        setTimeout(() => {
-            document.getElementById('loading-screen').hidden = true;
-            document.getElementById('main-menu').hidden = true;
-            document.getElementById('game-container').hidden = false;
-            this.gameTime = 0; this.playTime = 0;
-            this.loadLevel1();
-            this.camera.position.copy(this.player.mesh.position);
-            this.isGameActive = true; this.isPaused = false;
-            SaveSystem.startAutoSave(this);
-            document.getElementById('game-canvas').requestPointerLock();
-            document.getElementById('loading-progress').style.width = '0%';
-        }, 800);
+        document.getElementById('main-menu').hidden = true;
+        document.getElementById('game-container').hidden = false;
+        this.gameTime = 0; this.playTime = 0;
+        this.loadLevel1();
+        this.camera.position.copy(this.player.mesh.position);
+        this.isGameActive = true; this.isPaused = false;
+        SaveSystem.startAutoSave(this);
+        document.getElementById('game-canvas').requestPointerLock();
     }
     
     continueGame() {
@@ -380,4 +378,5 @@ class Game {
     }
 }
 
+// Start game on page load
 window.addEventListener('load', () => { window.game = new Game(); });
